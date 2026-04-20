@@ -1,6 +1,6 @@
 # Evidence Collection Sheet (Final)
 
-Tai lieu nay tong hop bang chung de nop bao cao nhom, dong bo voi rubric 60/40 va bo validator.
+Tài liệu này tổng hợp bằng chứng để nộp báo cáo nhóm, đồng bộ với rubric 60/40 và bộ validator.
 
 ## 1. Required evidence matrix
 
@@ -31,21 +31,21 @@ Current highlights used in report:
 - Alerts firing: 0
 
 ## 3. D/E to F handover rule
-- Neu `scripts/validate_member_d.py` hoac `scripts/validate_member_e.py` FAIL truoc demo: Member F tiep quan backlog.
-- Member F phai ghi ro takeover trong `docs/blueprint.md` va phan Member F trong report.
-- Sau handover, bat buoc chay lai gate tong:
+- Nếu `scripts/validate_member_d.py` hoặc `scripts/validate_member_e.py` FAIL trước demo: Member F tiếp quản backlog.
+- Member F phải ghi rõ takeover trong `docs/blueprint.md` và phần Member F trong report.
+- Sau handover, bắt buộc chạy lại gate tổng:
 
 ```bash
 python scripts/member_f_gate.py --check-member-de-runtime --strict
 ```
 
 ## 4. Optional bonus evidence
-- Incident before/after fix (metrics + traces + logs theo cung request flow).
+- Incident before/after fix (metrics + traces + logs theo cùng request flow).
 - Cost comparison before/after stabilization.
 - Automation proof (validator scripts per member + pre-demo gate).
 
 ## 5. Final submission checklist
-- [x] Co du evidence logs/traces/dashboard/alerts.
-- [x] Co runbook link hoat dong.
-- [x] Co command de tai hien ket qua.
-- [x] Co fallback ownership neu D/E con backlog.
+- [x] Có đủ evidence logs/traces/dashboard/alerts.
+- [x] Có runbook link hoạt động.
+- [x] Có command để tái hiện kết quả.
+- [x] Có fallback ownership nếu D/E còn backlog.

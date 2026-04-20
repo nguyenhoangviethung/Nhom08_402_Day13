@@ -1,16 +1,16 @@
 # Alert Rules and Runbooks
 
-Tai lieu nay la runbook van hanh cho phan Member C (SLO + Alerts), duoc dung de demo va xu ly su co trong bai cham Day 13.
+Tài liệu này là runbook vận hành cho phần Member C (SLO + Alerts), được dùng để demo và xử lý sự cố trong bài chấm Day 13.
 
 ## Alert summary
 
 | Alert name | Severity | Condition | Service impact | Owner |
 |---|---|---|---|---|
-| `high_latency_p95` | P2 | `latency_p95_ms > 5000 for 30m` | Tre response, nguy co vo SLO latency | team-oncall |
-| `high_error_rate` | P1 | `error_rate_pct > 5 for 5m` | User nhan loi 5xx, giam reliability | team-oncall |
-| `cost_budget_spike` | P2 | `hourly_cost_usd > 2x_baseline for 15m` | Vuot ngan sach AI cost | finops-owner |
+| `high_latency_p95` | P2 | `latency_p95_ms > 5000 for 30m` | Trễ response, nguy cơ vỡ SLO latency | team-oncall |
+| `high_error_rate` | P1 | `error_rate_pct > 5 for 5m` | User nhận lỗi 5xx, giảm reliability | team-oncall |
+| `cost_budget_spike` | P2 | `hourly_cost_usd > 2x_baseline for 15m` | Vượt ngân sách AI cost | finops-owner |
 
-Nguon du lieu:
+Nguồn dữ liệu:
 - Runtime metrics: `GET /metrics`
 - SLO status: `GET /slo`
 - Alert status: `GET /alerts`
@@ -22,27 +22,27 @@ Nguon du lieu:
 
 - Severity: P2
 - Trigger: `latency_p95_ms > 5000 for 30m`
-- Primary SLI lien quan: `latency_p95_ms` (objective 3000ms)
+- Primary SLI liên quan: `latency_p95_ms` (objective 3000ms)
 - Impact:
-  - Tail latency vuot nguong cho mot nhom request
-  - Co nguy co domino sang error rate neu timeout tang
+  - Tail latency vượt ngưỡng cho một nhóm request
+  - Có nguy cơ domino sang error rate nếu timeout tăng
 
 ### Triage checklist
-1. Mo dashboard latency va xac nhan p95 tang lien tuc.
-2. Mo trace list trong 1h gan nhat, sap xep theo latency.
-3. So sanh span `Retrieve_Context` va `LLM_Generate` de khoanh vung bottleneck.
-4. Kiem tra incident toggle `rag_slow` co dang bat hay khong.
+1. Mở dashboard latency và xác nhận p95 tăng liên tục.
+2. Mở trace list trong 1h gần nhất, sắp xếp theo latency.
+3. So sánh span `Retrieve_Context` và `LLM_Generate` để khoanh vùng bottleneck.
+4. Kiểm tra incident toggle `rag_slow` có đang bật hay không.
 
 ### Mitigation
-- Cat gon query/prompt dai bat thuong.
-- Chuyen sang retrieval fallback.
-- Giam kich thuoc context/prompt template.
-- Tang timeout tam thoi trong luong demo neu can.
+- Cắt gọn query/prompt dài bất thường.
+- Chuyển sang retrieval fallback.
+- Giảm kích thước context/prompt template.
+- Tăng timeout tạm thời trong luồng demo nếu cần.
 
 ### Verify recovery
-- `latency_p95` quay ve nguong an toan.
-- Alert status chuyen tu `firing` sang `ok`.
-- Trace moi cho thay span bottleneck da giam.
+- `latency_p95` quay về ngưỡng an toàn.
+- Alert status chuyển từ `firing` sang `ok`.
+- Trace mới cho thấy span bottleneck đã giảm.
 
 ---
 
@@ -50,25 +50,25 @@ Nguon du lieu:
 
 - Severity: P1
 - Trigger: `error_rate_pct > 5 for 5m`
-- Primary SLI lien quan: `error_rate_pct` (objective 2%)
+- Primary SLI liên quan: `error_rate_pct` (objective 2%)
 - Impact:
-  - User nhan response loi
-  - Suy giam chat luong demo va reliability
+  - User nhận response lỗi
+  - Suy giảm chất lượng demo và reliability
 
 ### Triage checklist
-1. Nhom logs theo `error_type` va `event=request_failed`.
-2. Mo trace fail de tim buoc gay loi (tool/RAG/LLM/schema).
-3. Doi chieu voi incident toggles (`tool_fail`) va thay doi code gan nhat.
+1. Nhóm logs theo `error_type` và `event=request_failed`.
+2. Mở trace fail để tìm bước gây lỗi (tool/RAG/LLM/schema).
+3. Đối chiếu với incident toggles (`tool_fail`) và thay đổi code gần nhất.
 
 ### Mitigation
-- Tat tool loi (`tool_fail`) va rollback thay doi moi nhat neu can.
-- Retry voi fallback flow/model.
-- Giam concurrency de tranh hieu ung day chuyen.
+- Tắt tool lỗi (`tool_fail`) và rollback thay đổi mới nhất nếu cần.
+- Retry với fallback flow/model.
+- Giảm concurrency để tránh hiệu ứng dây chuyền.
 
 ### Verify recovery
-- `error_rate_pct` giam duoi nguong 5% canh bao va tiep tuc huong toi objective 2%.
-- So request thanh cong tang de on dinh p95.
-- Alert `high_error_rate` tro lai `ok`.
+- `error_rate_pct` giảm dưới ngưỡng 5% cảnh báo và tiếp tục hướng tới objective 2%.
+- Số request thành công tăng để ổn định p95.
+- Alert `high_error_rate` trở lại `ok`.
 
 ---
 
@@ -76,36 +76,36 @@ Nguon du lieu:
 
 - Severity: P2
 - Trigger: `hourly_cost_usd > 2x_baseline for 15m`
-- Primary SLI lien quan: `daily_cost_usd` (objective < 2.5 USD/day)
+- Primary SLI liên quan: `daily_cost_usd` (objective < 2.5 USD/day)
 - Impact:
-  - Tang burn rate
-  - Ruui ro vuot ngan sach khi tai cao
+  - Tăng burn rate
+  - Rủi ro vượt ngân sách khi tải cao
 
 ### Triage checklist
-1. Mo cost dashboard va xac nhan trend tang bat thuong.
-2. Tach theo model/use case de tim nguon tang chi phi.
-3. Doi chieu `tokens_in_total`/`tokens_out_total` de kiem tra prompt inflation.
-4. Kiem tra incident `cost_spike` co dang bat trong buoi test hay khong.
+1. Mở cost dashboard và xác nhận trend tăng bất thường.
+2. Tách theo model/use case để tìm nguồn tăng chi phí.
+3. Đối chiếu `tokens_in_total`/`tokens_out_total` để kiểm tra prompt inflation.
+4. Kiểm tra incident `cost_spike` có đang bật trong buổi test hay không.
 
 ### Mitigation
-- Rut gon prompt va context.
-- Route use case don gian sang model re hon.
-- Bat prompt cache/reuse retrieval ket qua.
+- Rút gọn prompt và context.
+- Route use case đơn giản sang model rẻ hơn.
+- Bật prompt cache/reuse retrieval kết quả.
 
 ### Verify recovery
-- `hourly_cost_usd` quay ve baseline.
-- Trend cost dashboard phang hon, khong co dot bien.
-- Alert cost chuyen ve `ok`.
+- `hourly_cost_usd` quay về baseline.
+- Trend cost dashboard phẳng hơn, không có đột biến.
+- Alert cost chuyển về `ok`.
 
 ---
 
 ## Response flow (Metrics -> Traces -> Logs)
 
-1. Metrics phat hien symptom (`/alerts`, dashboard).
-2. Traces khoanh vung span/feature gay anh huong.
-3. Logs xac nhan root cause (`error_type`, payload preview, request_id).
-4. Ap dung fix.
-5. Re-check metrics va alert de dong su co.
+1. Metrics phát hiện symptom (`/alerts`, dashboard).
+2. Traces khoanh vùng span/feature gây ảnh hưởng.
+3. Logs xác nhận root cause (`error_type`, payload preview, request_id).
+4. Áp dụng fix.
+5. Re-check metrics và alert để đóng sự cố.
 
 ---
 
@@ -120,6 +120,6 @@ python scripts/load_test.py --concurrency 5 --repeat 1
 ```
 
 ## Definition of done (alerts)
-- Co du 3 alert rules dang chay.
-- Moi alert co owner + runbook + triage/mitigation/verify.
-- Alert status va evidence co the trinh bay live trong 2 phut.
+- Có đủ 3 alert rules đang chạy.
+- Mỗi alert có owner + runbook + triage/mitigation/verify.
+- Alert status và evidence có thể trình bày live trong 2 phút.

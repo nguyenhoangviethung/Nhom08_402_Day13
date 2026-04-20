@@ -4,7 +4,7 @@ Final implementation repo for Monitoring, Logging, and Observability lab.
 
 ## Project status
 
-System da hoan thanh cac tru cot observability:
+Hệ thống đã hoàn thành các trụ cột observability:
 - structured JSON logging
 - correlation ID propagation
 - PII scrubbing
@@ -146,8 +146,8 @@ Your final grade is calculated as follows:
 **Passing criteria**:
 - `validate_logs` >= 80 (target 100)
 - Langfuse traces >= 10
-- Dashboard du 6 panels va co threshold line
-- Blueprint/report day du thanh vien + evidence
+- Dashboard đủ 6 panels và có threshold line
+- Blueprint/report đầy đủ thành viên + evidence
 
 ## Repository
 - GitHub: https://github.com/VinUni-AI20k/Lab13-Observability
