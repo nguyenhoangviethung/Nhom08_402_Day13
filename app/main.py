@@ -1,4 +1,7 @@
 from __future__ import annotations
+from dotenv import load_dotenv
+load_dotenv()
+
 
 import os
 
@@ -13,7 +16,7 @@ from .metrics import record_error, snapshot
 from .middleware import CorrelationIdMiddleware
 from .pii import hash_user_id, summarize_text
 from .schemas import ChatRequest, ChatResponse
-from .tracing import tracing_enabled
+from .tracing import create_trace_id, shutdown_tracing, tracing_enabled
 
 configure_logging()
 log = get_logger()
@@ -32,6 +35,16 @@ async def startup() -> None:
     )
 
 
+@app.on_event("shutdown")
+async def shutdown() -> None:
+    shutdown_tracing()
+    log.info(
+        "app_stopped",
+        service=os.getenv("APP_NAME", "day13-observability-lab"),
+        env=os.getenv("APP_ENV", "dev"),
+    )
+
+
 @app.get("/health")
 async def health() -> dict:
     return {"ok": True, "tracing_enabled": tracing_enabled(), "incidents": status()}
@@ -44,16 +57,16 @@ async def metrics() -> dict:
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: Request, body: ChatRequest) -> ChatResponse:
-    # 1. Mã hóa user_id (tránh lộ thông tin danh tính thật trong log)
-    user_id_hash = hash_user_id(body.user_id)
-    
-    # 2. Gắn thêm (Enrich) các thông tin ngữ cảnh vào hệ thống Log
+    trace_id = create_trace_id(seed=request.state.correlation_id)
     bind_contextvars(
-        user_id_hash=user_id_hash,
+        request_id=request.state.correlation_id,
+        correlation_id=request.state.correlation_id,
+        trace_id=trace_id,
+        user_id_hash=hash_user_id(body.user_id),
         session_id=body.session_id,
         feature=body.feature,
-        model="mock-gpt4",  # Có thể cứng mã hoặc đọc từ cấu hình
-        env=os.getenv("APP_ENV", "dev") # Môi trường chạy (dev, staging, prod)
+        model=agent.model,
+        env=os.getenv("APP_ENV", "dev"),
     )
     
     log.info(
