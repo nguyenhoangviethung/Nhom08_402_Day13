@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass
-
+from structlog.contextvars import get_contextvars
 from . import metrics
 from .mock_llm import FakeLLM
 from .mock_rag import retrieve
@@ -27,6 +27,11 @@ class LabAgent:
 
     @observe()
     def run(self, user_id: str, feature: str, session_id: str, message: str) -> AgentResult:
+        # --- BƯỚC ĐỒNG BỘ CORRELATION ID VỚI TRACING ---
+        # Lấy request_id mà Member A đã tạo ra cho vòng đời request này.
+        current_context = get_contextvars()
+        request_id = current_context.get("request_id", "fallback-id-chua-co")
+
         started = time.perf_counter()
         docs = retrieve(message)
         prompt = f"Feature={feature}\nDocs={docs}\nQuestion={message}"
@@ -36,9 +41,10 @@ class LabAgent:
         cost_usd = self._estimate_cost(response.usage.input_tokens, response.usage.output_tokens)
 
         langfuse_context.update_current_trace(
+            id=request_id, # <-- CHỖ NÀY QUYẾT ĐỊNH ĐIỂM SỐ: Ép Trace ID trùng với Log ID
             user_id=hash_user_id(user_id),
             session_id=session_id,
-            tags=["lab", feature, self.model],
+            tags=["lab", feature, self.model, "v1.0"],
         )
         langfuse_context.update_current_observation(
             metadata={"doc_count": len(docs), "query_preview": summarize_text(message)},
