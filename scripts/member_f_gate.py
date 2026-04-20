@@ -14,6 +14,8 @@ from dotenv import load_dotenv
 
 LOG_PATH = Path("data/logs.jsonl")
 BLUEPRINT_PATH = Path("docs/blueprint-template.md")
+MEMBER_D_VALIDATOR_PATH = Path("scripts/validate_member_d.py")
+MEMBER_E_VALIDATOR_PATH = Path("scripts/validate_member_e.py")
 
 ENRICHMENT_FIELDS = {"user_id_hash", "session_id", "feature", "model"}
 
@@ -198,10 +200,45 @@ def write_group_metrics(
     return True
 
 
+def run_member_validator(script_path: Path, *, check_runtime: bool) -> tuple[bool, list[str]]:
+    if not script_path.exists():
+        return False, [f"missing validator script: {script_path}"]
+
+    cmd = [sys.executable, str(script_path), "--strict"]
+    if check_runtime:
+        cmd.append("--check-runtime")
+
+    try:
+        proc = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=180)
+    except subprocess.TimeoutExpired:
+        return False, [f"validator timeout: {script_path}"]
+
+    output = (proc.stdout or "") + ("\n" + proc.stderr if proc.stderr else "")
+    issues = [line.strip()[2:].strip() for line in output.splitlines() if line.strip().startswith("-")]
+
+    if proc.returncode == 0:
+        return True, []
+
+    if not issues:
+        summary = output.strip().splitlines()[-1] if output.strip() else "validator failed without details"
+        issues = [summary]
+    return False, issues
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Member F pre-demo quality gate")
     parser.add_argument("--min-log-score", type=int, default=80, help="Minimum acceptable validate logs score")
     parser.add_argument("--min-traces", type=int, default=10, help="Minimum required Langfuse traces")
+    parser.add_argument(
+        "--check-member-de-runtime",
+        action="store_true",
+        help="Run Member D/E runtime checks in addition to static checks",
+    )
+    parser.add_argument(
+        "--skip-member-de-checks",
+        action="store_true",
+        help="Skip Member D/E validator checks",
+    )
     parser.add_argument("--strict", action="store_true", help="Exit with non-zero code if any check fails")
     parser.add_argument(
         "--write-group-metrics",
@@ -215,6 +252,21 @@ def main() -> None:
     log_metrics = compute_log_score(LOG_PATH)
     trace_count, trace_error = get_trace_count()
     unresolved = find_blueprint_placeholders(BLUEPRINT_PATH)
+
+    member_d_pass = True
+    member_e_pass = True
+    member_d_issues: list[str] = []
+    member_e_issues: list[str] = []
+
+    if not args.skip_member_de_checks:
+        member_d_pass, member_d_issues = run_member_validator(
+            MEMBER_D_VALIDATOR_PATH,
+            check_runtime=args.check_member_de_runtime,
+        )
+        member_e_pass, member_e_issues = run_member_validator(
+            MEMBER_E_VALIDATOR_PATH,
+            check_runtime=args.check_member_de_runtime,
+        )
 
     log_pass = bool(log_metrics["error"] is None and log_metrics["score"] >= args.min_log_score)
     trace_pass = bool(trace_error is None and trace_count is not None and trace_count >= args.min_traces)
@@ -240,7 +292,30 @@ def main() -> None:
         preview = ", ".join(unresolved[:8])
         print(f"  First unresolved: {preview}")
 
-    overall_pass = log_pass and trace_pass and blueprint_pass
+    if args.skip_member_de_checks:
+        print("[SKIP] Member D/E validators: skipped by flag")
+    else:
+        print(f"[{'PASS' if member_d_pass else 'FAIL'}] Member D validator")
+        for issue in member_d_issues[:5]:
+            print(f"  - {issue}")
+
+        print(f"[{'PASS' if member_e_pass else 'FAIL'}] Member E validator")
+        for issue in member_e_issues[:5]:
+            print(f"  - {issue}")
+
+    handover_items: list[str] = []
+    if not member_d_pass:
+        handover_items.append("Member D backlog: run load test + incident evidence capture and update report")
+    if not member_e_pass:
+        handover_items.append("Member E backlog: complete dashboard/evidence screenshots and update report")
+
+    if handover_items:
+        print("\n[ACTION] Assign handover to Member F:")
+        for item in handover_items:
+            print(f"- {item}")
+        print("Member F should record these takeover tasks in docs/blueprint-template.md")
+
+    overall_pass = log_pass and trace_pass and blueprint_pass and member_d_pass and member_e_pass
     print(f"\nOverall: {'PASS' if overall_pass else 'FAIL'}")
 
     if args.write_group_metrics:
