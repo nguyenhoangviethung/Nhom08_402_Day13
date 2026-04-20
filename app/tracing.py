@@ -5,6 +5,16 @@ import uuid
 from contextlib import contextmanager
 from typing import Any
 
+
+def _normalize_langfuse_env() -> None:
+    host = os.getenv("LANGFUSE_HOST")
+    base_url = os.getenv("LANGFUSE_BASE_URL")
+    if not host and base_url:
+        os.environ["LANGFUSE_HOST"] = base_url
+
+
+_normalize_langfuse_env()
+
 class _NoopLangfuseClient:
     def update_current_trace(self, **kwargs: Any) -> None:
         return None
@@ -105,4 +115,8 @@ def shutdown_tracing() -> None:
 
 
 def tracing_enabled() -> bool:
-    return bool(os.getenv("LANGFUSE_PUBLIC_KEY") and os.getenv("LANGFUSE_SECRET_KEY"))
+    return bool(
+        os.getenv("LANGFUSE_PUBLIC_KEY")
+        and os.getenv("LANGFUSE_SECRET_KEY")
+        and (os.getenv("LANGFUSE_HOST") or os.getenv("LANGFUSE_BASE_URL"))
+    )

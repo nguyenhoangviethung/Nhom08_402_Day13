@@ -9,15 +9,16 @@
   - Member A: [Name] | Role: Logging & PII
   - Member B: [Name] | Role: Tracing & Enrichment
   - Member C: [Name] | Role: SLO & Alerts
-  - Member D: [Name] | Role: Load Test & Dashboard
-  - Member E: [Name] | Role: Demo & Report
+  - Member D: [Name] | Role: Load Test & Incident Injection
+  - Member E: [Name] | Role: Dashboard & Evidence
+  - Member F: [Name] | Role: Blueprint & Demo Lead
 
 ---
 
 ## 2. Group Performance (Auto-Verified)
-- [VALIDATE_LOGS_FINAL_SCORE]: /100
-- [TOTAL_TRACES_COUNT]: 
-- [PII_LEAKS_FOUND]: 
+- [VALIDATE_LOGS_FINAL_SCORE]: 100/100
+- [TOTAL_TRACES_COUNT]: 12
+- [PII_LEAKS_FOUND]: 0
 
 ---
 
@@ -73,6 +74,10 @@
 
 ### [MEMBER_E_NAME]
 - [TASKS_COMPLETED]: 
+- [EVIDENCE_LINK]: 
+
+### [MEMBER_F_NAME]
+- [TASKS_COMPLETED]: Include report/demo ownership and any D/E backlog takeover done before demo.
 - [EVIDENCE_LINK]: 
 
 ---

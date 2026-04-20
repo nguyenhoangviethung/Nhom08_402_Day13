@@ -46,6 +46,21 @@ python scripts/inject_incident.py --scenario rag_slow
 
 # Check your implementation progress
 python scripts/validate_logs.py
+
+# Validate Member D deliverables (load test + incident injection)
+python scripts/validate_member_d.py --check-runtime --strict
+
+# Validate Member E deliverables (dashboard + evidence)
+python scripts/validate_member_e.py --check-runtime --strict
+
+# Validate Member C deliverables (SLO + Alerts)
+python scripts/validate_member_c.py --check-runtime --strict
+
+# Member F pre-demo quality gate
+python scripts/member_f_gate.py --check-member-de-runtime --strict
+
+# Optional: auto-fill group metrics in docs/blueprint-template.md
+python scripts/member_f_gate.py --write-group-metrics
 ```
 
 ## Repo map
@@ -71,6 +86,10 @@ scripts/
   load_test.py           generate requests
   inject_incident.py     flip incident toggles
   validate_logs.py       schema checks for logs
+  validate_member_d.py   verify load test + incident injection readiness
+  validate_member_e.py   verify dashboard + evidence readiness
+  validate_member_c.py   verify SLO + alerts readiness
+  member_f_gate.py       pre-demo quality gate for report/demo owner
 data/
   sample_queries.jsonl   requests for testing
   expected_answers.jsonl starter quality checks
