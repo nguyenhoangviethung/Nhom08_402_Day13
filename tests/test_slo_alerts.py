@@ -42,6 +42,19 @@ def test_evaluate_alerts_firing_on_absolute_thresholds() -> None:
     assert "high_error_rate" in firing_names
 
 
+def test_evaluate_alerts_supports_runtime_alias_metric_name() -> None:
+    # app.metrics.snapshot() publishes latency_p95 (without _ms suffix)
+    metrics = {
+        "latency_p95": 5500,
+        "error_rate_pct": 0.1,
+        "hourly_cost_usd": 0.1,
+    }
+    out = evaluate_alerts(metrics)
+
+    firing_names = {a["name"] for a in out["alerts"] if a["status"] == "firing"}
+    assert "high_latency_p95" in firing_names
+
+
 def test_evaluate_alerts_cost_spike_with_default_baseline() -> None:
     metrics = {
         "latency_p95_ms": 100,

@@ -1,6 +1,6 @@
-# Guide kiểm tra Member A và Member B
+# Guide kiểm tra Member A, B, C và F
 
-Tài liệu này dùng để kiểm tra nhanh phần việc của Member A và Member B theo rubric Day 13 Observability Lab.
+Tài liệu này dùng để kiểm tra nhanh phần việc của Member A, B, C và F theo rubric Day 13 Observability Lab.
 
 ## 1. Member A - Logging + PII
 
@@ -117,7 +117,41 @@ npx -y langfuse-cli api traces get <trace-id>
 
 ---
 
-## 3. Quy trình demo nhanh
+## 3. Member C - SLO + Alerts
+
+Mục tiêu cần đạt:
+- Có cấu hình SLO hợp lệ và khớp metric runtime.
+- Có ít nhất 3 alert rules, có runbook link hoạt động.
+- Endpoint `/slo` và `/alerts` trả dữ liệu đúng cấu trúc.
+
+### File cần kiểm tra
+- `config/slo.yaml`
+- `config/alert_rules.yaml`
+- `docs/alerts.md`
+- `app/slo_alerts.py`
+- `app/main.py`
+
+### Checklist nhanh
+1. `config/slo.yaml` có đủ 4 SLI: `latency_p95_ms`, `error_rate_pct`, `daily_cost_usd`, `quality_score_avg`.
+2. `config/alert_rules.yaml` có tối thiểu 3 alert: `high_latency_p95`, `high_error_rate`, `cost_budget_spike`.
+3. Mỗi alert có đủ `severity`, `condition`, `owner`, `runbook`.
+4. Runbook link trỏ đúng heading thật trong `docs/alerts.md`.
+5. Endpoint `/slo` và `/alerts` trả về 200 và có keys bắt buộc.
+
+### Cách kiểm tra tự động
+
+```bash
+python scripts/validate_member_c.py --check-runtime --strict
+```
+
+### Dấu hiệu Member C đạt tối đa
+- Static config PASS (SLO + alerts + runbook anchors).
+- Runtime endpoint PASS (`/metrics`, `/slo`, `/alerts`).
+- Không còn placeholder dạng starter note trong SLO config.
+
+---
+
+## 4. Quy trình demo nhanh
 
 1. Mở API health để chắc chắn tracing đang bật.
 2. Gửi 1 request chat để tạo log và trace.
@@ -133,14 +167,15 @@ npx -y langfuse-cli api traces list --limit 20
 
 ---
 
-## 4. Kết luận chấm nhanh
+## 5. Kết luận chấm nhanh
 
 - Member A đạt tốt khi: log sạch, đủ context, không PII, validator 100/100.
 - Member B đạt tốt khi: trace lên cloud, đủ hierarchy, đủ tags/metadata, có tối thiểu 10 traces.
+- Member C đạt tốt khi: SLO/alert đúng chuẩn, runbook hoạt động, endpoint `/slo` và `/alerts` kiểm chứng được.
 
 ---
 
-## 5. Plan thực thi cho Member F để đạt điểm tuyệt đối
+## 6. Plan thực thi cho Member F để đạt điểm tuyệt đối
 
 Vai trò khuyến nghị cho Member F:
 - Blueprint report owner (điền, kiểm, khóa bản nộp).
@@ -151,7 +186,7 @@ Mục tiêu điểm:
 - Chốt toàn bộ điều kiện đạt của Group Score.
 - Tối đa điểm Individual: phần report cá nhân + bằng chứng Git rõ ràng.
 
-### 5.1 Deliverables bắt buộc trước giờ demo
+### 6.1 Deliverables bắt buộc trước giờ demo
 
 1. Report hoàn chỉnh theo mẫu:
 - Điền đủ tag trong `docs/blueprint-template.md`.
@@ -169,7 +204,7 @@ Mục tiêu điểm:
 4. Bằng chứng cá nhân từng thành viên:
 - Mỗi member có ít nhất 1 commit/PR link trong mục Individual Contributions.
 
-### 5.2 Timeline thực thi (khuyến nghị T-120 đến T-0)
+### 6.2 Timeline thực thi (khuyến nghị T-120 đến T-0)
 
 T-120 đến T-90 (Freeze kỹ thuật):
 1. Pull nhánh demo mới nhất.
@@ -215,7 +250,7 @@ Auto điền 3 chỉ số nhóm vào report:
 python scripts/member_f_gate.py --write-group-metrics
 ```
 
-### 5.3 Kịch bản demo gợi ý để ăn trọn điểm Live Demo
+### 6.3 Kịch bản demo gợi ý để ăn trọn điểm Live Demo
 
 1. Mở đầu (30s): nêu mục tiêu observability và tiêu chí đạt.
 2. Logging + PII (2 phút):
@@ -232,7 +267,7 @@ python scripts/member_f_gate.py --write-group-metrics
 - Chỉ ra root cause bằng trace/log cụ thể.
 6. Kết thúc (30s): nhắc pass criteria đã đạt.
 
-### 5.4 Bộ câu trả lời Q&A cần chuẩn bị (Member F điều phối)
+### 6.4 Bộ câu trả lời Q&A cần chuẩn bị (Member F điều phối)
 
 1. Correlation ID truyền xuyên suốt như thế nào và giúp gì khi debug?
 2. Vì sao cần scrub PII ở cả payload và event text?
@@ -240,7 +275,7 @@ python scripts/member_f_gate.py --write-group-metrics
 4. Cách chứng minh root cause khi inject incident `rag_slow` hoặc `tool_fail`?
 5. Nếu Langfuse UI không hiện trace nhưng CLI có dữ liệu thì xử lý ra sao?
 
-### 5.5 Definition of Done cho Member F
+### 6.5 Definition of Done cho Member F
 
 Chỉ coi là xong khi đồng thời đạt:
 1. Report `docs/blueprint-template.md` điền đủ 100%, không placeholder.

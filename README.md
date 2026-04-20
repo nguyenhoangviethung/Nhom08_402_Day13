@@ -47,6 +47,9 @@ python scripts/inject_incident.py --scenario rag_slow
 # Check your implementation progress
 python scripts/validate_logs.py
 
+# Validate Member C deliverables (SLO + Alerts)
+python scripts/validate_member_c.py --check-runtime --strict
+
 # Member F pre-demo quality gate
 python scripts/member_f_gate.py --strict
 
@@ -77,6 +80,8 @@ scripts/
   load_test.py           generate requests
   inject_incident.py     flip incident toggles
   validate_logs.py       schema checks for logs
+  validate_member_c.py   verify SLO + alerts readiness
+  member_f_gate.py       pre-demo quality gate for report/demo owner
 data/
   sample_queries.jsonl   requests for testing
   expected_answers.jsonl starter quality checks
