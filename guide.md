@@ -1,6 +1,6 @@
-# Guide kiểm tra Member A, B, C, D và F
+# Guide kiểm tra Member A, B, C, D, E và F
 
-Tài liệu này dùng để kiểm tra nhanh phần việc của Member A, B, C, D và F theo rubric Day 13 Observability Lab.
+Tài liệu này dùng để kiểm tra nhanh phần việc của Member A, B, C, D, E và F theo rubric Day 13 Observability Lab.
 
 ## 1. Member A - Logging + PII
 
@@ -390,3 +390,61 @@ Chỉ coi là xong khi đồng thời đạt:
 5. Mỗi member có link commit/PR trong phần cá nhân.
 6. Đã rehearsal ít nhất 1 lần full flow 8-10 phút.
 7. Nếu D/E có backlog, đã ghi takeover của Member F trong report và có bằng chứng kèm theo.
+
+---
+
+## 9. Quy trình điền báo cáo nhóm (blueprint.md)
+
+Mục tiêu:
+- Điền đầy đủ báo cáo nhóm với số liệu runtime mới nhất.
+- Đồng bộ nội dung giữa `docs/blueprint.md`, `docs/grading-evidence.md`, `docs/dashboard-spec.md`, `docs/alerts.md`.
+
+### 9.1 Data cần chụp trước khi viết
+1. Log quality:
+  - `python scripts/validate_logs.py`
+2. Trace count live:
+  - `set -a && source .env && set +a && npx -y langfuse-cli api traces list --limit 1`
+3. Runtime snapshot:
+  - `curl -s http://127.0.0.1:8000/metrics | python -m json.tool`
+  - `curl -s http://127.0.0.1:8000/slo | python -m json.tool`
+  - `curl -s http://127.0.0.1:8000/alerts | python -m json.tool`
+
+### 9.2 Mapping screenshot -> mục báo cáo
+1. `docs/static/tracing.png`:
+  - Trace list + metadata
+2. `docs/static/sessions.png`:
+  - Session/trace hierarchy evidence
+3. `docs/static/dashboard_latency.png`:
+  - SLO latency panel
+4. `docs/static/dashboard_usage.png`:
+  - Trace/observation volume panel
+5. `docs/static/dashboard_cost.png`:
+  - Cost governance panel
+
+### 9.3 Cách điền để tối đa điểm
+1. `docs/blueprint.md`:
+  - Điền số liệu thật (không dùng placeholder).
+  - Gắn link evidence tương ứng.
+  - Viết rõ incident RCA theo flow Metrics -> Traces -> Logs.
+2. `docs/grading-evidence.md`:
+  - Đánh dấu trạng thái hoàn thành cho từng evidence item.
+  - Ghi owner + fallback rõ ràng.
+3. `docs/dashboard-spec.md`:
+  - Bắt buộc có threshold line + đơn vị đo + mapping metric keys.
+4. `docs/alerts.md`:
+  - Mỗi alert phải có trigger, triage, mitigation, verify recovery.
+
+### 9.4 Final gate trước khi nộp
+
+```bash
+python scripts/validate_logs.py
+python scripts/validate_member_c.py --check-runtime --strict
+python scripts/validate_member_d.py --check-runtime --strict
+python scripts/validate_member_e.py --check-runtime --strict
+python scripts/member_f_gate.py --check-member-de-runtime --strict
+```
+
+Definition of done (submission):
+1. `docs/blueprint.md` hoàn chỉnh và nhất quán với evidence.
+2. Không còn mismatch giữa số liệu báo cáo và số liệu runtime.
+3. Gate tổng PASS.

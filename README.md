@@ -1,29 +1,23 @@
-# Day 13 Observability Lab Template
+# Day 13 Observability Lab - Nhom08_402_13
 
-Template repo for a 4-hour hands-on lab on Monitoring, Logging, and Observability.
+Final implementation repo for Monitoring, Logging, and Observability lab.
 
-## What students will build
+## Project status
 
-A small FastAPI "agent" instrumented with:
+System da hoan thanh cac tru cot observability:
 - structured JSON logging
 - correlation ID propagation
 - PII scrubbing
 - Langfuse tracing
-- minimal metrics aggregation
-- SLOs, alerts, and a blueprint report
+- runtime metrics aggregation
+- SLO + alert evaluation
+- dashboard/evidence + group blueprint report
 
-This template is intentionally incomplete. Teams are expected to finish TODOs during the lab.
-
-## Suggested lab flow (Gapped Template)
-
-1. **Run the starter app**: Observe that logs are basic and correlation IDs are missing.
-2. **Implement Correlation IDs**: Fix `app/middleware.py` so every request has a unique `x-request-id`.
-3. **Enrich Logs**: Update `app/main.py` to bind user, session, and feature context to every log.
-4. **Sanitize Data**: Implement the PII scrubber in `app/logging_config.py`.
-5. **Verify with Script**: Run `python scripts/validate_logs.py` to check your progress.
-6. **Tracing**: Send 10-20 requests and verify traces in Langfuse (ensure `observe` decorator is used).
-7. **Dashboards**: Build your 6-panel dashboard from exported metrics.
-8. **Alerting**: Configure alert rules in `config/alert_rules.yaml` and test them.
+Latest verification snapshot:
+- validate logs: 100/100
+- live traces: 115
+- PII leaks: 0
+- SLO overall: pass
 
 ## Quick start
 
@@ -35,17 +29,14 @@ cp .env.example .env
 uvicorn app.main:app --reload
 ```
 
-## Tooling
+## Core verification commands
 
 ```bash
-# Generate requests (use --concurrency 5 to test parallel bottlenecks)
-python scripts/load_test.py --concurrency 5
-
-# Inject failures live
-python scripts/inject_incident.py --scenario rag_slow
-
-# Check your implementation progress
+# Logging + PII
 python scripts/validate_logs.py
+
+# Validate Member C deliverables (SLO + Alerts)
+python scripts/validate_member_c.py --check-runtime --strict
 
 # Validate Member D deliverables (load test + incident injection)
 python scripts/validate_member_d.py --check-runtime --strict
@@ -53,15 +44,39 @@ python scripts/validate_member_d.py --check-runtime --strict
 # Validate Member E deliverables (dashboard + evidence)
 python scripts/validate_member_e.py --check-runtime --strict
 
-# Validate Member C deliverables (SLO + Alerts)
-python scripts/validate_member_c.py --check-runtime --strict
-
-# Member F pre-demo quality gate
+# Member F final pre-demo gate
 python scripts/member_f_gate.py --check-member-de-runtime --strict
 
 # Optional: auto-fill group metrics in docs/blueprint-template.md
 python scripts/member_f_gate.py --write-group-metrics
 ```
+
+## Demo support commands
+
+```bash
+# Generate traffic
+python scripts/load_test.py --concurrency 5 --repeat 2
+
+# Inject/rollback incidents
+python scripts/inject_incident.py --scenario rag_slow
+python scripts/inject_incident.py --scenario rag_slow --disable
+
+# Runtime inspection
+curl -s http://127.0.0.1:8000/health | python -m json.tool
+curl -s http://127.0.0.1:8000/metrics | python -m json.tool
+curl -s http://127.0.0.1:8000/slo | python -m json.tool
+curl -s http://127.0.0.1:8000/alerts | python -m json.tool
+```
+
+## Reports and evidence
+
+- Group report: `docs/blueprint.md`
+- Blueprint template (machine-parsed format): `docs/blueprint-template.md`
+- Alerts runbook: `docs/alerts.md`
+- Dashboard specification: `docs/dashboard-spec.md`
+- Evidence matrix: `docs/grading-evidence.md`
+- Individual reports: `docs/individual/`
+- Screenshot assets: `docs/static/`
 
 ## Repo map
 
@@ -98,11 +113,13 @@ data/
   audit.jsonl            optional audit log output
 
 docs/
+  blueprint.md           final group report (filled)
   blueprint-template.md  team submission template
   alerts.md              runbook + alert worksheet
-  dashboard-spec.md      6-panel dashboard checklist
-  grading-evidence.md    evidence collection sheet
-  mock-debug-qa.md       oral/written debugging questions
+  dashboard-spec.md      6-panel dashboard specification + evidence mapping
+  grading-evidence.md    submission evidence matrix
+  individual/            member reports
+  static/                screenshot assets for report
 ```
 
 ## Team role suggestion
@@ -126,8 +143,12 @@ Your final grade is calculated as follows:
    - **Individual Report (20 pts)**: Quality of your specific contributions in `docs/blueprint-template.md`.
    - **Git Evidence (20 pts)**: Traceable work via commits and code ownership.
 
-**Passing Criteria**: 
-- All `TODO` blocks must be completed.
-- Minimum of 10 traces must be visible in Langfuse.
-- Dashboard must show all 6 required panels.
+**Passing criteria**:
+- `validate_logs` >= 80 (target 100)
+- Langfuse traces >= 10
+- Dashboard du 6 panels va co threshold line
+- Blueprint/report day du thanh vien + evidence
+
+## Repository
+- GitHub: https://github.com/VinUni-AI20k/Lab13-Observability
 # Nhom08_402_13
