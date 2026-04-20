@@ -46,6 +46,12 @@ python scripts/inject_incident.py --scenario rag_slow
 
 # Check your implementation progress
 python scripts/validate_logs.py
+
+# Evaluate SLO compliance from current runtime metrics
+curl -s http://127.0.0.1:8000/slo | jq
+
+# Evaluate alert firing status from alert_rules.yaml
+curl -s http://127.0.0.1:8000/alerts | jq
 ```
 
 ## Repo map

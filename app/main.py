@@ -16,6 +16,7 @@ from .metrics import record_error, snapshot
 from .middleware import CorrelationIdMiddleware
 from .pii import hash_user_id, summarize_text
 from .schemas import ChatRequest, ChatResponse
+from .slo_alerts import evaluate_alerts, evaluate_slos
 from .tracing import create_trace_id, shutdown_tracing, tracing_enabled
 
 configure_logging()
@@ -53,6 +54,16 @@ async def health() -> dict:
 @app.get("/metrics")
 async def metrics() -> dict:
     return snapshot()
+
+
+@app.get("/slo")
+async def slo_status() -> dict:
+    return evaluate_slos(snapshot())
+
+
+@app.get("/alerts")
+async def alerts_status() -> dict:
+    return evaluate_alerts(snapshot())
 
 
 @app.post("/chat", response_model=ChatResponse)
