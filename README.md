@@ -46,6 +46,9 @@ python scripts/inject_incident.py --scenario rag_slow
 
 # Check your implementation progress
 python scripts/validate_logs.py
+
+# Member F pre-demo quality gate
+python scripts/member_f_gate.py --strict
 ```
 
 ## Repo map

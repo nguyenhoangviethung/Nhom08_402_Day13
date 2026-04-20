@@ -137,3 +137,109 @@ npx -y langfuse-cli api traces list --limit 20
 
 - Member A đạt tốt khi: log sạch, đủ context, không PII, validator 100/100.
 - Member B đạt tốt khi: trace lên cloud, đủ hierarchy, đủ tags/metadata, có tối thiểu 10 traces.
+
+---
+
+## 5. Plan thực thi cho Member F để đạt điểm tuyệt đối
+
+Vai trò khuyến nghị cho Member F:
+- Blueprint report owner (điền, kiểm, khóa bản nộp).
+- Demo lead (điều phối phần trình bày và xử lý Q&A).
+- Evidence curator (gom ảnh, link commit/PR, đối chiếu rubric).
+
+Mục tiêu điểm:
+- Chốt toàn bộ điều kiện đạt của Group Score.
+- Tối đa điểm Individual: phần report cá nhân + bằng chứng Git rõ ràng.
+
+### 5.1 Deliverables bắt buộc trước giờ demo
+
+1. Report hoàn chỉnh theo mẫu:
+- Điền đủ tag trong `docs/blueprint-template.md`.
+- Không để sót placeholder kiểu `[GROUP_NAME]`, `[EVIDENCE_LINK]`, `[TRACE_WATERFALL_EXPLANATION]`.
+
+2. Bộ evidence đầy đủ theo checklist:
+- Dùng `docs/grading-evidence.md` làm nguồn kiểm.
+- Bắt buộc có ảnh: trace list >= 10, trace waterfall, log correlation_id, log PII redaction, dashboard 6 panels, alert rules + runbook.
+
+3. Chốt số liệu kỹ thuật cuối cùng:
+- `VALIDATE_LOGS_FINAL_SCORE`.
+- `TOTAL_TRACES_COUNT`.
+- `PII_LEAKS_FOUND`.
+
+4. Bằng chứng cá nhân từng thành viên:
+- Mỗi member có ít nhất 1 commit/PR link trong mục Individual Contributions.
+
+### 5.2 Timeline thực thi (khuyến nghị T-120 đến T-0)
+
+T-120 đến T-90 (Freeze kỹ thuật):
+1. Pull nhánh demo mới nhất.
+2. Chạy kiểm tra nhanh:
+  - `python scripts/validate_logs.py`
+  - `curl -s http://127.0.0.1:8000/health`
+  - `npx -y langfuse-cli api traces list --limit 20`
+3. Nếu trace < 10, bơm thêm request trước khi chụp ảnh.
+
+T-90 đến T-60 (Khóa evidence):
+1. Chụp đủ ảnh theo `docs/grading-evidence.md`.
+2. Đặt tên ảnh thống nhất (ví dụ: `evidence_trace_list.png`, `evidence_dashboard_6_panels.png`).
+3. Điền đường dẫn ảnh vào `docs/blueprint-template.md`.
+
+T-60 đến T-30 (Hoàn thiện report):
+1. Viết ngắn gọn nhưng có bằng chứng cho Incident Response:
+  - Symptoms
+  - Root cause (trace id/log line cụ thể)
+  - Fix action
+  - Preventive measure
+2. Điền đầy đủ phần cá nhân cho từng member + link commit/PR.
+
+T-30 đến T-10 (Dry run):
+1. Rehearsal 1 vòng đủ flow:
+  - Health check -> request -> logs -> traces -> dashboard -> alerts -> incident RCA.
+2. Canh thời gian tổng 8-10 phút.
+3. Member F tập câu chuyển mạch giữa các phần, không để chết màn.
+
+T-10 đến T-0 (Final gate):
+1. Chạy lại 3 lệnh kiểm tra cốt lõi.
+2. Verify không còn placeholder trong report.
+3. Chốt người trả lời Q&A theo chủ đề.
+
+Lệnh gate một phát cho Member F:
+
+```bash
+python scripts/member_f_gate.py --strict
+```
+
+### 5.3 Kịch bản demo gợi ý để ăn trọn điểm Live Demo
+
+1. Mở đầu (30s): nêu mục tiêu observability và tiêu chí đạt.
+2. Logging + PII (2 phút):
+- Show log JSON có correlation_id và context.
+- Show ví dụ dữ liệu nhạy cảm đã bị redact.
+3. Tracing (2 phút):
+- Show trace list (>=10).
+- Mở 1 waterfall và giải thích root span -> retrieve -> generation.
+4. Dashboard + SLO + Alerts (2 phút):
+- Show đủ 6 panels có đơn vị và threshold line.
+- Show 3 alert rule và runbook link.
+5. Incident RCA (2 phút):
+- Kể flow điều tra Metrics -> Traces -> Logs.
+- Chỉ ra root cause bằng trace/log cụ thể.
+6. Kết thúc (30s): nhắc pass criteria đã đạt.
+
+### 5.4 Bộ câu trả lời Q&A cần chuẩn bị (Member F điều phối)
+
+1. Correlation ID truyền xuyên suốt như thế nào và giúp gì khi debug?
+2. Vì sao cần scrub PII ở cả payload và event text?
+3. Vì sao trace cần tags và metadata (feature, session, user hash)?
+4. Cách chứng minh root cause khi inject incident `rag_slow` hoặc `tool_fail`?
+5. Nếu Langfuse UI không hiện trace nhưng CLI có dữ liệu thì xử lý ra sao?
+
+### 5.5 Definition of Done cho Member F
+
+Chỉ coi là xong khi đồng thời đạt:
+1. Report `docs/blueprint-template.md` điền đủ 100%, không placeholder.
+2. `python scripts/validate_logs.py` đạt >= 80 (mục tiêu 100).
+3. Langfuse có >= 10 traces live.
+4. Bộ ảnh evidence đủ theo `docs/grading-evidence.md`.
+5. Mỗi member có link commit/PR trong phần cá nhân.
+6. Đã rehearsal ít nhất 1 lần full flow 8-10 phút.
