@@ -47,11 +47,11 @@ python scripts/inject_incident.py --scenario rag_slow
 # Check your implementation progress
 python scripts/validate_logs.py
 
-# Evaluate SLO compliance from current runtime metrics
-curl -s http://127.0.0.1:8000/slo | jq
+# Member F pre-demo quality gate
+python scripts/member_f_gate.py --strict
 
-# Evaluate alert firing status from alert_rules.yaml
-curl -s http://127.0.0.1:8000/alerts | jq
+# Optional: auto-fill group metrics in docs/blueprint-template.md
+python scripts/member_f_gate.py --write-group-metrics
 ```
 
 ## Repo map
@@ -117,3 +117,4 @@ Your final grade is calculated as follows:
 - All `TODO` blocks must be completed.
 - Minimum of 10 traces must be visible in Langfuse.
 - Dashboard must show all 6 required panels.
+# Nhom08_402_13
