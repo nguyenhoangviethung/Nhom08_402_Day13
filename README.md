@@ -49,6 +49,9 @@ python scripts/validate_logs.py
 
 # Member F pre-demo quality gate
 python scripts/member_f_gate.py --strict
+
+# Optional: auto-fill group metrics in docs/blueprint-template.md
+python scripts/member_f_gate.py --write-group-metrics
 ```
 
 ## Repo map

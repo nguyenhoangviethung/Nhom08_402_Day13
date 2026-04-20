@@ -209,6 +209,12 @@ Lệnh gate một phát cho Member F:
 python scripts/member_f_gate.py --strict
 ```
 
+Auto điền 3 chỉ số nhóm vào report:
+
+```bash
+python scripts/member_f_gate.py --write-group-metrics
+```
+
 ### 5.3 Kịch bản demo gợi ý để ăn trọn điểm Live Demo
 
 1. Mở đầu (30s): nêu mục tiêu observability và tiêu chí đạt.
